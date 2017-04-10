@@ -4,10 +4,13 @@ var bodyParser = require('body-parser');
 var User = require('./models/User'); // require the db model
 var app = express();
 var router = express.Router();
+var dbUser = require('./secrets.json').dbUser;
+var canvasToken = require('./secrets.json').canvas.token;
+var request = require('request');
 
 var port = process.env.API_PORT || 3001;
 
-mongoose.connect('mongodb://username:password@ds143340.mlab.com:43340/security');
+mongoose.connect('mongodb://' + dbUser.username +':' + dbUser.password + '@ds143340.mlab.com:43340/security');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -25,38 +28,10 @@ router.get('/', function (req, res) {
   res.json({ message: 'API Initialized!' });
 });
 
-// router.route('/note')
-// // get all notes from the database
-// .get((req, res) => {
-//   Note.find((err, notes) => {
-//     if (err) {
-//       res.send(err);
-//     }
-//     res.json(notes);
-//   });
-// })
-// // add new note to database
-// .post((req, res) => {
-//   const note = new Note();
-//   note.text = req.body.text;
-//   note.save((err) => {
-//     if (err) {
-//       res.send(err);
-//     }
-//
-//     res.json('New note was saved!');
-//   });
-// })
-// // update note in the database
-// .put((req, res) => {
-//   Note.findOneAndUpdate({ "_id": req.body.id }, { "text": req.body.text }, { new: true },  (err, data) => {
-//     if (err) {
-//       res.send(err);
-//     } else {
-//       res.json(data);
-//     }
-//   })
-// });
+router.route('/courses')
+.get((req, res) => {
+  request('https://ucn.instructure.com/api/v1/courses?access_token=' + canvasToken).pipe(res);
+})
 
 app.use('/api', router);
 
